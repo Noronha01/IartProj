@@ -44,20 +44,20 @@ class Board:
 
     def get_value(self, row: int, col: int) -> str:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        # TODO
-        pass
+        value = self.grid[row][col]
+        return value
 
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """Devolve os valores imediatamente acima e abaixo,
         respectivamente."""
-        # TODO
-        pass
+        first,second = self.grid[row - 1][col], self.grid[row + 1][col]
+        return (first,second)
 
     def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
-        # TODO
-        pass
+        first,second = self.grid[row][col - 1], self.grid[row][col + 1]
+        return (first,second)
 
     def print_board(self):
         for row in self.grid:
@@ -134,7 +134,10 @@ class Bimaru(Problem):
 
 if __name__ == "__main__":
     board = Board.parse_instance()
-    board.print_board()
+    #board.print_board()
+    #print(board.get_value(0,0))
+    print(board.adjacent_vertical_values(1, 0))
+    print(board.adjacent_horizontal_values(1, 0))
     # TODO:
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,

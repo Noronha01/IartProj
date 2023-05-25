@@ -134,10 +134,10 @@ class Bimaru(Problem):
 
 if __name__ == "__main__":
     board = Board.parse_instance()
-    #board.print_board()
+    board.print_board()
     #print(board.get_value(0,0))
-    print(board.adjacent_vertical_values(1, 0))
-    print(board.adjacent_horizontal_values(1, 0))
+    #print(board.adjacent_vertical_values(1, 0))
+    #print(board.adjacent_horizontal_values(1, 0))
     # TODO:
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,

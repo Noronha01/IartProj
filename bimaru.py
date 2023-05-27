@@ -2,9 +2,9 @@
 # Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
 # Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
 
-# Grupo 00:
-# 00000 Nome1
-# 00000 Nome2
+# Grupo 46:
+# 102543 Pedro Noronha
+# 00000 Mariana Carvalho
 
 import sys
 from search import (
@@ -41,6 +41,10 @@ class Board:
 
     def set_cell(self, row, col, value):
         self.grid[row][col] = value
+
+    def set_values(self, row_values, col_values):
+        self.row_values = row_values
+        self.col_values = col_values
 
     def get_value(self, row: int, col: int) -> str:
         """Devolve o valor na respetiva posição do tabuleiro."""
@@ -83,6 +87,8 @@ class Board:
         board_size = len(row_values)
         board = Board(board_size)
 
+        board.set_values(row_values, col_values)
+
         hint_lines = input_lines[3:]  # Skip the first three lines
 
         for line in hint_lines:
@@ -101,7 +107,7 @@ class Bimaru(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
         # TODO
-        pass
+        self.board = Board
 
     def actions(self, state: BimaruState):
         """Retorna uma lista de ações que podem ser executadas a

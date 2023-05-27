@@ -40,7 +40,9 @@ class Board:
         self.grid = [[None] * size for _ in range(size)]
 
     def set_cell(self, row, col, value):
-        self.grid[row][col] = value
+        # check if it legal to set this cell
+        if row >= 0 and row < self.size and col >= 0 and col < self.size and self.get_value(row, col) == None:
+            self.grid[row][col] = value
 
     def set_values(self, row_values, col_values):
         self.row_values = row_values
@@ -106,14 +108,78 @@ class Board:
 class Bimaru(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        # TODO
-        self.board = Board
+
+        self.board = board
+
+    def mandatory_actions(self, state: BimaruState):
+        """Devolve uma lista de todas as ações obrigatórias a
+        partir de um determinado estado passado como argumento."""
+
+        mandatory_actions = []
+
+        for row in range(state.board.size):
+            for col in range(state.board.size):
+                cell = state.board.get_value(row, col)
+                if cell != None and cell != "W" and cell != "M":
+                    for i in range(row-1, row+2):
+                        for j in range(col-1, col+2):
+                            if i != row or j != col:
+                                if cell == "T" and (i != row+1 or j != col):
+                                    self.board.set_cell(i, j, "w")
+                                    mandatory_actions.append((i, j, "w"))
+                                elif cell == "B" and (i != row-1 or j != col):
+                                    self.board.set_cell(i, j, "w")
+                                    mandatory_actions.append((i, j, "w"))
+                                elif cell == "R" and (i != row or j != col-1):
+                                    self.board.set_cell(i, j, "w")
+                                    mandatory_actions.append((i, j, "w"))
+                                elif cell == "L" and (i != row or j != col+1):
+                                    self.board.set_cell(i, j, "w")
+                                    mandatory_actions.append((i, j, "w"))
+                                elif cell == "C":
+                                    self.board.set_cell(i, j, "w")
+                                    mandatory_actions.append((i, j, "w"))
+                elif cell == "M":
+                    top, down = state.board.adjacent_vertical_values(row, col)
+                    left, right = state.board.adjacent_horizontal_values(row, col)
+                    if (top != None and top != "W") or (down != None and down != "W"):
+                        self.board.set_cell(row, col-1, "w")
+                    elif (left != None and left != "W") or (right != None and right != "W"):
+                        self.board.set_cell(row-1, col, "w")
+                        self.board.set_cell(row+1, col, "w")
+
+
+        for i in range(state.board.size):
+            if state.board.row_values[i] == 0:
+                for j in range(state.board.size):
+                    self.board.set_cell(i, j, "w")
+            if state.board.col_values[i] == 0:
+                for j in range(state.board.size):
+                    self.board.set_cell(j, i, "w")
+
+
+
+
+
+
+
+
 
     def actions(self, state: BimaruState):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
-        # TODO
+
+        actions = []
         pass
+
+
+
+
+        
+    def is_legal_action(self, state:BimaruState, action):
+        pass
+
+
 
     def result(self, state: BimaruState, action):
         """Retorna o estado resultante de executar a 'action' sobre
@@ -141,6 +207,9 @@ class Bimaru(Problem):
 if __name__ == "__main__":
     board = Board.parse_instance()
     board.print_board()
+    bimaru = Bimaru(board)
+    bimaru.mandatory_actions(BimaruState(board))
+    bimaru.board.print_board()
     #print(board.get_value(0,0))
     #print(board.adjacent_vertical_values(1, 0))
     #print(board.adjacent_horizontal_values(1, 0))

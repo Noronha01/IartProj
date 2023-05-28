@@ -44,6 +44,25 @@ class Board:
         if row >= 0 and row < self.size and col >= 0 and col < self.size and self.get_value(row, col) == None:
             self.grid[row][col] = value
 
+    def set_ship(self, row, col, size, orientation):
+        """ sets a ship on the board with origin in (row, col) and orientation H or V """
+        for i in range(size):
+            if orientation == "H":
+                set_cell(row, col+i, "S")
+            elif orientation == "V":
+                set_cell(row+1, col, "S")
+
+    def ship_fits(self, row, col, orientation):
+        """ sets a ship on the board with origin in (row, col) and orientation H or V """
+        for i in range(size):
+            if orientation == "H":
+                if col+i >= self.size or get_value(row, col+i) != None:
+                    return False
+            elif orientation == "V":
+                if row+i >= self.size or get_value(row+i, col) != None:
+                    return False
+        return True
+
     def set_values(self, row_values, col_values):
         self.row_values = row_values
         self.col_values = col_values
@@ -120,7 +139,7 @@ class Bimaru(Problem):
         for row in range(state.board.size):
             for col in range(state.board.size):
                 cell = state.board.get_value(row, col)
-                if cell != None and cell != "W" and cell != "M":
+                if cell != None and cell != "W":
                     for i in range(row-1, row+2):
                         for j in range(col-1, col+2):
                             if i != row or j != col:
@@ -139,14 +158,17 @@ class Bimaru(Problem):
                                 elif cell == "C":
                                     self.board.set_cell(i, j, "w")
                                     mandatory_actions.append((i, j, "w"))
-                elif cell == "M":
-                    top, down = state.board.adjacent_vertical_values(row, col)
-                    left, right = state.board.adjacent_horizontal_values(row, col)
-                    if (top != None and top != "W") or (down != None and down != "W"):
-                        self.board.set_cell(row, col-1, "w")
-                    elif (left != None and left != "W") or (right != None and right != "W"):
-                        self.board.set_cell(row-1, col, "w")
-                        self.board.set_cell(row+1, col, "w")
+                                elif cell == "M" and i != row and j != col:
+                                    self.board.set_cell(i, j, "w")
+                
+                    if cell == "M":
+                        top, down = state.board.adjacent_vertical_values(row, col)
+                        left, right = state.board.adjacent_horizontal_values(row, col)
+                        if (top != None and top != "W") or (down != None and down != "W"):
+                            self.board.set_cell(row, col-1, "w")
+                        elif (left != None and left != "W") or (right != None and right != "W"):
+                            self.board.set_cell(row-1, col, "w")
+                            self.board.set_cell(row+1, col, "w")
 
 
         for i in range(state.board.size):
@@ -158,27 +180,23 @@ class Bimaru(Problem):
                     self.board.set_cell(j, i, "w")
 
 
+        def actions(self, state: BimaruState):
+            """Retorna uma lista de ações que podem ser executadas a
+            partir do estado passado como argumento."""
+
+            actions = []
+
+            for row in range(state.board.size):
+                for col in range(state.board.size):
+                    if state.board.get_value(row, col) == None:
+                        for size in range(1, 4):
+                            if state.board.size.ship_fits(row, col, size, "H"):
+                                actions.append((row, col, size, "H"))
+                            if state.board.size.ship_fits(row, col, size, "V"):
+                                actions.append((row, col, size, "V"))
 
 
-
-
-
-
-
-    def actions(self, state: BimaruState):
-        """Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento."""
-
-        actions = []
-        pass
-
-
-
-
-        
-    def is_legal_action(self, state:BimaruState, action):
-        pass
-
+            return actions
 
 
     def result(self, state: BimaruState, action):
@@ -210,9 +228,7 @@ if __name__ == "__main__":
     bimaru = Bimaru(board)
     bimaru.mandatory_actions(BimaruState(board))
     bimaru.board.print_board()
-    #print(board.get_value(0,0))
-    #print(board.adjacent_vertical_values(1, 0))
-    #print(board.adjacent_horizontal_values(1, 0))
+
     # TODO:
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,

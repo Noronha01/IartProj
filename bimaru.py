@@ -7,6 +7,7 @@
 # 00000 Mariana Carvalho
 
 import sys
+import copy
 from search import (
     Problem,
     Node,
@@ -191,12 +192,6 @@ class Board:
 
         print('\n')
 
-    def put_w(self):
-        for row in range(self.size):
-            for col in range(self.size):
-                if self.get_value(row,col) is None:
-                    self.set_cell(row, col, 'w')
-
 
     @staticmethod
     def parse_instance():
@@ -268,6 +263,11 @@ class Bimaru(Problem):
 
         print(action)
 
+        new_board = Board(state.board.size)
+        new_board.grid = copy.deepcopy(state.board.grid)
+        new_board.size = copy.deepcopy(state.board.size)
+        new_board.row_values = copy.deepcopy(state.board.row_values)
+        new_board.col_values = copy.deepcopy(state.board.col_values)
         new_state = BimaruState(state.board)
 
         if not new_state.board.ship_fits(action[0], action[1], action[2], action[3]):
@@ -411,10 +411,7 @@ class Bimaru(Problem):
 
         for row in range(size):
             for col in range(size):
-                if board.get_value(row,col).lower() == '.':
-                    print('.\n')
-                    return False
-                elif board.get_value(row,col).lower() == 't':
+                if board.get_value(row,col).lower() == 't':
                     if self.check_top(board, row, col) == 4:
                         boat4_count += 1
                     elif self.check_top(board, row, col) == 3:

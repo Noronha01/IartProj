@@ -148,35 +148,47 @@ class Board:
         for row in range(self.size):
             for col in range(self.size):
                 cell = self.get_value(row, col)
-                if cell != None and cell != "W":
+                if cell != None and cell.upper() != "W":
                     for i in range(row-1, row+2):
                         for j in range(col-1, col+2):
                             if i != row or j != col:
-                                if cell == "T" and (i != row+1 or j != col):
+                                if cell.upper() == "T" and (i != row+1 or j != col):
                                     self.set_cell(i, j, "w")
-                                elif cell == "B" and (i != row-1 or j != col):
+                                elif cell.upper() == "B" and (i != row-1 or j != col):
                                     self.set_cell(i, j, "w")
-                                elif cell == "R" and (i != row or j != col-1):
+                                elif cell.upper() == "R" and (i != row or j != col-1):
                                     self.set_cell(i, j, "w")
-                                elif cell == "L" and (i != row or j != col+1):
+                                elif cell.upper() == "L" and (i != row or j != col+1):
                                     self.set_cell(i, j, "w")
-                                elif cell == "C":
+                                elif cell.upper() == "C":
                                     self.set_cell(i, j, "w")
-                                elif cell == "M" and i != row and j != col:
+                                elif cell.upper() == "M" and i != row and j != col:
                                     self.set_cell(i, j, "w")
                 
-                    if cell == "M":
+                    if cell.upper() == "M":
                         top, down = self.adjacent_vertical_values(row, col)
                         left, right = self.adjacent_horizontal_values(row, col)
 
                         if (top != None and top.upper() == "W") or (down != None and down.upper() == "W") or \
                         col-1 == 0 or col+1 == self.size:
-                            self.set_cell(row, col-1, "w")
-                            self.set_cell(row, col+1, "w")
-                        elif (down != None and down.upper == "W") or (right != None and right.upper() == "W") or \
-                        row-1 == 0 or row + 1 == self.size:
                             self.set_cell(row-1, col, "w")
                             self.set_cell(row+1, col, "w")
+
+                            if col-1 == 0:
+                                self.set_cell(row, col-1, "l")
+                            elif col+1 == self.size:
+                                self.set_cell(row, col+1, "r")
+
+                        elif (left != None and left.upper == "W") or (right != None and right.upper() == "W") or \
+                        row-1 == 0 or row + 1 == self.size:
+                            self.set_cell(row, col-1, "w")
+                            self.set_cell(row, col+1, "w")
+
+                            if row-1 == 0:
+                                self.set_cell(row-1, col, "t")
+                            elif row+1 == self.size:
+                                self.set_cell(row+1, col, "b")
+
 
 
     @staticmethod
@@ -217,7 +229,7 @@ class Bimaru(Problem):
         """O construtor especifica o estado inicial."""
 
         # criar array the states?
-        super().__init__(board)    
+        super().__init__(BimaruState(board))
         #self.board = board
 
     def actions(self, state: BimaruState):
@@ -247,7 +259,14 @@ class Bimaru(Problem):
         das presentes na lista obtida pela execução de
         self.actions(state)."""
 
+
+        print(action)
+
         new_state = BimaruState(state.board)
+
+        if not new_state.board.ship_fits(action[0], action[1], action[2], action[3]):
+            new_state.board.print_board()
+            return new_state
 
         row = action[0]
         col = action[1]
@@ -260,7 +279,7 @@ class Bimaru(Problem):
                 else:
                     new_state.board.set_cell(row, col, "m")
 
-            if new_state.board.get_value(action[0]+action[2], col) != None and \
+            if action[0]+action[2] < new_state.board.size and new_state.board.get_value(action[0]+action[2], col) != None and \
             (new_state.board.get_value(action[0]+action[2], col).upper() == "B" or \
                 new_state.board.get_value(action[0]+action[2], col).upper() == "M"):
                 new_state.board.set_cell(action[0]+action[2]-1, col, "m")
@@ -276,16 +295,20 @@ class Bimaru(Problem):
                 else:
                     new_state.board.set_cell(row, col, "m")
             
-            if new_state.board.get_value(row, action[1]+action[2]) != None and \
+            if action[1]+action[2] < new_state.board.size and new_state.board.get_value(row, action[1]+action[2]) != None and \
             (new_state.board.get_value(row, action[1]+action[2]).upper() == "R" or \
                 new_state.board.get_value(row, action[1]+action[2]).upper() == "M"):
                 new_state.board.set_cell(row, action[1]+action[2]-1, "m")
             else:
-                new_state.board.set_cell(row, action[1]+action[2]-1, col, "r")
+                new_state.board.set_cell(row, action[1]+action[2]-1, "r")
 
         elif action[3] == "C":
             new_state.board.set_cell(action[0], action[1], "c")
 
+        new_state.board.mandatory_actions()
+
+        print("______________")
+        new_state.board.print_board()
         return new_state
 
 
@@ -294,10 +317,10 @@ class Bimaru(Problem):
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas de acordo com as regras do problema."""
         # TODO
-        for i in range(state.size):
-            if state.row_values[i] != 0:
+        for i in range(state.board.size):
+            if state.board.row_values[i] != 0:
                 return False
-            if state.col_values[i] != 0:
+            if range(state.board.col_values[i] != 0):
                 return False
         return True
 
@@ -312,7 +335,7 @@ class Bimaru(Problem):
 
 if __name__ == "__main__":
     board = Board.parse_instance()
-    #board.print_board()
+    board.mandatory_actions()
     bimaru = Bimaru(board)
     solution = depth_first_tree_search(bimaru)
     #bimaru.board.mandatory_actions()

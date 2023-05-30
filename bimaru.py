@@ -460,7 +460,6 @@ class Bimaru(Problem):
 
 if __name__ == "__main__":
     board = Board.parse_instance()
-<<<<<<< HEAD
     board.mandatory_actions()
     bimaru = Bimaru(board)
     solution = depth_first_tree_search(bimaru)

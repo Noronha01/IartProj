@@ -322,26 +322,30 @@ class Bimaru(Problem):
         """Retorna o valor correspondente ao tamanho do barco, ou False se
         não satisfaz as condições certas"""
         first = board.get_value(row + 1 , col)
-        if row + 1 == 9:
-            if first.lower() == 'b':
-                return 2
-            return False
-        second = board.get_value(row + 2, col)
-        if row + 1 == 8:
-            if first.lower() == 'm' and second.lower() == 'b':
-                return 3 
-            elif first.lower() == 'b' and second.lower() == 'w':
-                return 2
-            return False
-        third = board.get_value(row + 3, col)
-        if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'b'):
-            return 4
-        elif (first.lower(), second.lower(), third.lower()) == ('m', 'b', 'w'):
-            return 3
-        elif (first.lower(), second.lower(), third.lower()) == ('b', 'w', 'w'):
-            return 2
-        else:
-            return False
+        if first != None:
+            if row + 1 == 9:
+                if first.lower() == 'b':
+                    return 2
+                return False
+            second = board.get_value(row + 2, col)
+            if second != None:
+                if row + 1 == 8:
+                    if first != None and second != None:
+                        if first.lower() == 'm' and second.lower() == 'b':
+                            return 3 
+                        elif first.lower() == 'b' and second.lower() == 'w':
+                            return 2
+                        return False
+                third = board.get_value(row + 3, col)
+                if third != None:
+                    if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'b'):
+                        return 4
+                    elif (first.lower(), second.lower(), third.lower()) == ('m', 'b', 'w'):
+                        return 3
+                    elif (first.lower(), second.lower(), third.lower()) == ('b', 'w', 'w'):
+                        return 2
+                    else:
+                        return False
 
     def check_middle(self, board, row, col):
         """Retorna True se e só se as posições acima e abaixo de um middle forem 
@@ -369,26 +373,29 @@ class Bimaru(Problem):
         """Retorna o valor correspondente ao tamanho do barco, ou False se
         não satisfaz as condições certas"""
         first = board.get_value(row, col + 1)
-        if col + 1 == 9:
-            if first.lower() == 'r':
-                return 2
-            return False
-        second = board.get_value(row, col + 2)
-        if col + 1 == 8:
-            if first.lower() == 'm' and second.lower() == 'r':
-                return 3 
-            elif first.lower() == 'r' and second.lower() == 'w':
-                return 2
-            return False
-        third = board.get_value(row, col + 3)
-        if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'r'):
-            return 4
-        elif (first.lower(), second.lower(), third.lower()) == ('m', 'r', 'w'):
-            return 3
-        elif (first.lower(), second.lower(), third.lower()) == ('r', 'w', 'w'):
-            return 2
-        else:
-            return False
+        if first != None:
+            if col + 1 == 9:
+                if first.lower() == 'r':
+                    return 2
+                return False
+            second = board.get_value(row, col + 2)
+            if second != None:
+                if col + 1 == 8:
+                    if first.lower() == 'm' and second.lower() == 'r':
+                        return 3 
+                    elif first.lower() == 'r' and second.lower() == 'w':
+                        return 2
+                    return False
+                third = board.get_value(row, col + 3)
+                if third != None:
+                    if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'r'):
+                        return 4
+                    elif (first.lower(), second.lower(), third.lower()) == ('m', 'r', 'w'):
+                        return 3
+                    elif (first.lower(), second.lower(), third.lower()) == ('r', 'w', 'w'):
+                        return 2
+                    else:
+                        return False
 
     def goal_test(self, state: BimaruState):
         """Retorna True se e só se o estado passado como argumento é

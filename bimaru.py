@@ -65,13 +65,13 @@ class Board:
         """ sets a ship on the board with origin in (row, col) and orientation H or V """
         for i in range(size):
             if orientation == "H":
-                set_cell(row, col+i, "S")
+                self.set_cell(row, col+i, "S")
             elif orientation == "V":
-                set_cell(row+1, col, "S")
+                self.set_cell(row+1, col, "S")
 
     def ship_fits(self, row, col, size, orientation):
         """ sets a ship on the board with origin in (row, col) and orientation H or V """
-        for i in range(size):
+        for i in range(self.size):
             if orientation == "H":
                 if col+i >= self.size or self.get_value(row, col+i) != None or self.row_values[row] < size:
                     return False
@@ -189,6 +189,13 @@ class Board:
                             elif row+1 == self.size:
                                 self.set_cell(row+1, col, "b")
 
+        print('\n')
+
+    def put_w(self):
+        for row in range(self.size):
+            for col in range(self.size):
+                if self.get_value(row,col) is None:
+                    self.set_cell(row, col, 'w')
 
 
     @staticmethod
@@ -227,7 +234,6 @@ class Board:
 class Bimaru(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-
         # criar array the states?
         super().__init__(BimaruState(board))
         #self.board = board
@@ -312,19 +318,138 @@ class Bimaru(Problem):
         return new_state
 
 
+    def check_top(self, board, row, col):
+        """Retorna o valor correspondente ao tamanho do barco, ou False se
+        não satisfaz as condições certas"""
+        first = board.get_value(row + 1 , col)
+        if row + 1 == 9:
+            if first.lower() == 'b':
+                return 2
+            return False
+        second = board.get_value(row + 2, col)
+        if row + 1 == 8:
+            if first.lower() == 'm' and second.lower() == 'b':
+                return 3 
+            elif first.lower() == 'b' and second.lower() == 'w':
+                return 2
+            return False
+        third = board.get_value(row + 3, col)
+        if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'b'):
+            return 4
+        elif (first.lower(), second.lower(), third.lower()) == ('m', 'b', 'w'):
+            return 3
+        elif (first.lower(), second.lower(), third.lower()) == ('b', 'w', 'w'):
+            return 2
+        else:
+            return False
+
+    def check_middle(self, board, row, col):
+        """Retorna True se e só se as posições acima e abaixo de um middle forem 
+        top e middle ou middle e bottom, respetivamente"""
+        if board.get_value(row - 1 , col).lower() == 't' or board.get_value(row - 1 , col).lower() == 'm':
+            return board.adjacent_vertical_values(row, col) in {('T', 'M'), ('T', 'm'), ('t', 'M'), ('t', 'm'), ('M', 'B'), ('m', 'B'), ('M', 'b'), ('m', 'b'), ('T', 'B'), ('t', 'B'), ('T', 'b'), ('t', 'b')}
+        elif board.get_value(row , col - 1).lower() == 'l' or board.get_value(row , col - 1).lower() == 'm':
+            return board.adjacent_horizontal_values(row, col) in {('L', 'M'), ('L', 'm'), ('l', 'M'), ('l', 'm'), ('M', 'r'), ('m', 'r'), ('M', 'r'), ('m', 'r'), ('L', 'R'), ('l', 'R'), ('L', 'r'), ('l', 'r')}
+
+    def check_bottom(self, board, row, col):
+        """Retorna True se e só se as posições acima e abaixo de um bottom forem 
+        middle e water ou top e water ou top e vazio, respetivamente"""
+        return board.adjacent_vertical_values(row, col) in {('M', 'W'), ('M', 'w'), ('m', 'W'), ('m', 'w'), ('T', 'W'), ('T', 'w'), ('t', 'W'), ('t', 'w'), ('m', None), ('M', None), ('t', None), ('T', None)}
+
+    def check_right(self, board, row, col):
+        """Retorna True se e só se as posições acima e abaixo de um bottom forem 
+        middle e water ou left e water ou left e vazio, respetivamente"""
+        return board.adjacent_horizontal_values(row, col) in {('M', 'W'), ('M', 'w'), ('m', 'W'), ('m', 'w'), ('L', 'W'), ('L', 'w'), ('l', 'W'), ('l', 'w'), ('m', None), ('M', None), ('l', None), ('L', None)}
+
+    def check_center(self, board, row, col):
+        """Retorna True se e só seum center for rodeado por água"""
+        return (board.adjacent_vertical_values(row, col) in {('w', 'W'), ('W', 'w'), ('w', 'w'), (None, 'w'), (None, 'W'), ('w', None), ('W', None)}) and (board.adjacent_horizontal_values(row, col) in {('w', 'W'), ('W', 'w'), ('w', 'w'), (None, 'w'), (None, 'W'), ('w', None), ('W', None)})
+
+    def check_left(self, board, row, col):
+        """Retorna o valor correspondente ao tamanho do barco, ou False se
+        não satisfaz as condições certas"""
+        first = board.get_value(row, col + 1)
+        if col + 1 == 9:
+            if first.lower() == 'r':
+                return 2
+            return False
+        second = board.get_value(row, col + 2)
+        if col + 1 == 8:
+            if first.lower() == 'm' and second.lower() == 'r':
+                return 3 
+            elif first.lower() == 'r' and second.lower() == 'w':
+                return 2
+            return False
+        third = board.get_value(row, col + 3)
+        if (first.lower(), second.lower(), third.lower()) == ('m', 'm', 'r'):
+            return 4
+        elif (first.lower(), second.lower(), third.lower()) == ('m', 'r', 'w'):
+            return 3
+        elif (first.lower(), second.lower(), third.lower()) == ('r', 'w', 'w'):
+            return 2
+        else:
+            return False
+
     def goal_test(self, state: BimaruState):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas de acordo com as regras do problema."""
-        # TODO
-        for i in range(state.board.size):
-            if state.board.row_values[i] != 0:
-                return False
-            if range(state.board.col_values[i] != 0):
-                return False
-        return True
+        board = state.board
+        size = state.board.size
 
+        boat1_count = 0
+        boat2_count = 0
+        boat3_count = 0
+        boat4_count = 0
 
+        for row in range(size):
+            for col in range(size):
+                if board.get_value(row,col).lower() == '.':
+                    print('.\n')
+                    return False
+                elif board.get_value(row,col).lower() == 't':
+                    if self.check_top(board, row, col) == 4:
+                        boat4_count += 1
+                    elif self.check_top(board, row, col) == 3:
+                        boat3_count += 1
+                    elif self.check_top(board, row, col) == 2:
+                        boat2_count += 1
+                    else:
+                        print('t\n')
+                        return False
+
+                elif board.get_value(row,col).lower() == 'l':
+                    if self.check_left(board, row, col) == 4:
+                        boat4_count += 1
+                    elif self.check_left(board, row, col) == 3:
+                        boat3_count += 1
+                    elif self.check_left(board, row, col) == 2:
+                        boat2_count += 1
+                    else:
+                        print('l\n')
+                        return False
+
+                elif board.get_value(row,col).lower() == 'm':
+                    if not self.check_middle(board, row, col):
+                        print('m\n')
+                        return False
+                elif board.get_value(row,col).lower() == 'b':
+                    if not self.check_bottom(board, row, col):
+                        print('b\n')
+                        return False
+                elif board.get_value(row,col).lower() == 'r':
+                    if not self.check_right(board, row, col):
+                        print('r\n')
+                        return False
+                elif board.get_value(row,col).lower() == 'c':
+                    if not self.check_center(board, row, col):
+                        print('c\n')
+                        return False
+                    else:
+                        boat1_count += 1
+        if boat1_count == 4 and boat2_count == 3 and boat3_count == 2 and boat4_count == 1:
+            return True
+        return False
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
         # TODO
@@ -335,6 +460,7 @@ class Bimaru(Problem):
 
 if __name__ == "__main__":
     board = Board.parse_instance()
+<<<<<<< HEAD
     board.mandatory_actions()
     bimaru = Bimaru(board)
     solution = depth_first_tree_search(bimaru)

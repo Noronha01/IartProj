@@ -364,9 +364,9 @@ class Board:
                 for i in range(1, 4):
                     if self.get_value(row, col+i) != None and self.get_value(row, col+i).upper() == "R":
                         for j in range(0, i):
-                            set_cell(row, col+j, "m")
-                            set_cell(row-1, col+j, "w")
-                            set_cell(row+1, col+j, "w")
+                            self.set_cell(row, col+j, "m")
+                            self.set_cell(row-1, col+j, "w")
+                            self.set_cell(row+1, col+j, "w")
                 if self.get_value(row, col+2) != None and self.get_value(row, col+2).upper() == "M":
                     self.set_cell(row, col+1, "m")
                     self.set_cell(row-1, col+1, "w")

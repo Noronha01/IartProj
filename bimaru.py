@@ -216,13 +216,44 @@ class Board:
                 else:
                     break
  
-        elif self.get_value(row, col).upper() == "R":
-            for i in range(1, min(self.row_values[row]+1, 4)):
-                if self.cell_fits(row, col-i, "right_ship") and self.ships[i] > 0:
-                    ships.append((row, col-i+1, i+2, "H"))
-                else:
-                    break
+        elif self.get_value(row, col).upper() == "M":
+            # ships fit horizontaly with the "M"
+            if (self.get_value(row-1, col) != None and self.get_value(row-1, col).upper() == "W") or\
+            (self.get_value(row+1, col) != None and self.get_value(row+1, col).upper() == "W"):
+                ships.append((row, col-1, 3, "H"))
+                if self.row_values[row] >= 3:
+                    if self.cell_fits(row, col-2, "new_ship"):
+                        ships.append((row, col-2, 4, "H"))
+                    if self.cell_fits(row, col+2, "new_ship"):
+                        ships.append((row, col-1, 4, "H"))
 
+
+            # ships fit verticaly with the "M"
+            elif (self.get_value(row, col-1) != None and self.get_value(row, col-1).upper() == "W") or\
+            (self.get_value(row, col+1) != None and self.get_value(row, col+1).upper() == "W"):
+                ships.append((row-1, col, 3, "V"))
+                if self.row_values[row] >= 3:
+                    if self.cell_fits(row-2, col, "new_ship"):
+                        ships.append((row-2, col, 4, "V"))
+                    if self.cell_fits(row+2, col, "new_ship"):
+                        ships.append((row-1, col, 4, "V"))
+
+            # find both vertical and horizontal ships with the "M"
+            else:
+                ships.append((row, col-1, 3, "H"))
+                ships.append((row-1, col, 3, "V"))
+
+                if self.row_values[row] >= 3:
+                    if self.cell_fits(row, col-2, "new_ship"):
+                        ships.append((row, col-2, 4, "H"))
+                    if self.cell_fits(row, col+2, "new_ship"):
+                        ships.append((row, col-1, 4, "H"))
+
+                if self.row_values[row] >= 3:
+                    if self.cell_fits(row-2, col, "new_ship"):
+                        ships.append((row-2, col, 4, "V"))
+                    if self.cell_fits(row+2, col, "new_ship"):
+                        ships.append((row-1, col, 4, "V"))
 
 
         return ships
@@ -298,6 +329,12 @@ class Board:
                             self.set_cell(row+j, col, "m")
                             self.set_cell(row+j, col-1, "w")
                             self.set_cell(row+j, col+1, "w")
+                    if self.get_value(row+i, col) != None and self.get_value(row+i, col).upper() == "W":
+                        for w in range(1, i-1):
+                            self.set_cell(row+w, col, "m")
+                            self.set_cell(row+w, col-1, "w")
+                            self.set_cell(row+w, col+1, "w")
+                        self.set_cell(row+i-1, col, "b")
                 if self.get_value(row+2, col) != None and self.get_value(row+2, col).upper() == "M":
                     self.set_cell(row+1, col, "m")
                     self.set_cell(row+1, col-1, "w")
@@ -364,9 +401,9 @@ class Board:
                 for i in range(1, 4):
                     if self.get_value(row, col+i) != None and self.get_value(row, col+i).upper() == "R":
                         for j in range(0, i):
-                            self.set_cell(row, col+j, "m")
-                            self.set_cell(row-1, col+j, "w")
-                            self.set_cell(row+1, col+j, "w")
+                            set_cell(row, col+j, "m")
+                            set_cell(row-1, col+j, "w")
+                            set_cell(row+1, col+j, "w")
                 if self.get_value(row, col+2) != None and self.get_value(row, col+2).upper() == "M":
                     self.set_cell(row, col+1, "m")
                     self.set_cell(row-1, col+1, "w")
@@ -406,6 +443,7 @@ class Board:
                 self.set_cell(row-1, col-3, "w")
                 self.set_cell(row-1, col-3, "w")
                 self.set_cell(row-1, col-3, "w")
+
 
 
     def mandatory_actions(self):

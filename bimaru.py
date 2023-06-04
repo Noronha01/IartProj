@@ -391,6 +391,28 @@ class Board:
 
         return ships
 
+
+    def legal_board(self):
+
+        for i in range(self.size):
+            if self.row_values[i] > 0:
+                count = 0
+                for j in range(self.size):
+                    if self.get_value(i, j) == None:
+                        count += 1
+                if count < self.row_values[i]:
+                    return False
+            if self.col_values[i] > 0:
+                count1 = 0
+                for w in range(self.size):
+                    if self.get_value(w, i) == None:
+                        count1 += 1
+                if count1 < self.col_values[i]:
+                    return False
+
+        return True
+
+
     def print_board(self):
         for row in self.grid:
             for cell in row:
@@ -455,8 +477,17 @@ class Bimaru(Problem):
         """Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento."""
 
+        if not state.board.legal_board():
+            return []
+
         actions = state.board.get_ships_from_pos()
-        
+
+        size = len(actions)
+
+        if size > 0:
+            if actions[0][4] == None and size < state.board.ships[actions[0][2]-1]:
+                return []
+
         #sorted_actions = sorted(actions, key=lambda x: x[2], reverse=True)
         #print(actions)
         #return sorted_actions
@@ -560,22 +591,42 @@ class Bimaru(Problem):
     def h(self, node: Node):
         """Função heuristica utilizada para a procura A*."""
         # Calculate the number of remaining ships to be placed
+
+        """
         remaining_ships = sum(node.state.board.ships)
+        count = 0
+
+        for value in range(node.state.board.size):
+            if node.state.board.row_values[value] > 0:
+                count += 1
+            if node.state.board.col_values[value] > 0:
+                count += 1
 
         # Calculate the total number of cells with unknown content
         unknown_cells = np.count_nonzero(node.state.board.grid == None)
 
         # Estimate the minimum number of moves required
-        min_moves = remaining_ships + unknown_cells
+        min_moves = 100*remaining_ships + count + unknown_cells
 
         return min_moves
 
-    
+        """
 
+
+"""
+def main():
+    board = Board.parse_instance()
+    bimaru = Bimaru(board)
+    solution = depth_first_tree_search(bimaru)
+    solution.state.board.print_board()
+"""
 
 if __name__ == "__main__":
     board = Board.parse_instance()
     bimaru = Bimaru(board)
     solution = depth_first_tree_search(bimaru)
+    #solution = astar_search(bimaru)
+    #solution = breadth_first_tree_search(bimaru)
     solution.state.board.print_board()
+    #cProfile.run("main()")
 
